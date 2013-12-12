@@ -52,11 +52,11 @@ shot [-hbrRswqc] [name]
            if not specified, will be asked using Zenity if -q not specified
 ```
 
-By default it creates files like 20131211_153611_nameyouentered.png
+By default it creates files like ```20131211_153611_nameyouentered.png```
 
 #### Dependencies
 
-On Ubuntu, just run "sudo make linux-dependencies"
+On Ubuntu, just run ```sudo make linux-dependencies```
 
 Dependencies:
 * scrot
