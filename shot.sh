@@ -157,7 +157,6 @@ zenity --notification --text="created ${filename}\n($info)" &
 if [ $execute -eq 1 ]; then
     f="$(echo $filename |sed 's/[\&/]/\\&/g')"
     n=$(basename $filename)
-    echo $n
     d="$now"
     i="$info"
     command=$(echo $execute_command |sed "s/"%f"/${f}/g" |sed "s/"%n"/${n}/g" |sed "s/"%d"/${d}/g" |sed "s/"%i"/${i}/g")
