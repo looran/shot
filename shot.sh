@@ -24,7 +24,7 @@ _EOF
 
 usage() {
     cat <<_EOF
-$program [-hbrRswqc] [name]
+$program [-hbrRswqce] [name]
     -b   : browse shots directory ($SHOTDIR)
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot
@@ -32,6 +32,7 @@ $program [-hbrRswqc] [name]
     -w   : whole screen instead of focused window
     -q   : do not ask filename
     -c   : copy shot path to clipboard
+    -e   : execute command (%f=shot_path, %n=filename, %d=shot_date, %i=infos)
     name : optional, prepended to filename after date
            if not specified, will be asked using Zenity if -q not specified
 
@@ -85,7 +86,9 @@ select=0
 screen=0
 noname=0
 clip=0
-opts="$(getopt -o hbrRswqc -n "$program" -- "$@")"
+execute=0
+execute_command=""
+opts="$(getopt -o hbrRswqce: -n "$program" -- "$@")"
 err=$?
 eval set -- "$opts"
 while true; do case $1 in
@@ -97,6 +100,7 @@ while true; do case $1 in
     -w) screen=1; shift ;;
     -q) noname=1; shift ;;
     -c) clip=1; shift ;;
+    -e) execute=1; shift; execute_command=$1; shift ;;
     --) shift; break ;;
 esac done
 
@@ -149,3 +153,14 @@ fi
 
 echo "created $filename ($info)"
 zenity --notification --text="created ${filename}\n($info)" &
+
+if [ $execute -eq 1 ]; then
+    f="$(echo $filename |sed 's/[\&/]/\\&/g')"
+    n=$(basename $filename)
+    echo $n
+    d="$now"
+    i="$info"
+    command=$(echo $execute_command |sed "s/"%f"/${f}/g" |sed "s/"%n"/${n}/g" |sed "s/"%d"/${d}/g" |sed "s/"%i"/${i}/g")
+    echo "running $command"
+    eval $command
+fi

@@ -5,6 +5,7 @@
 * Nice date in shot title by default (20131212_032511)
 * No question mode (-q) = quick screenshots
 * -c copies path of shot to clipboard
+* -e executes command (%f will be the shot path)
 
 #### Examples that you can bind to key shortcuts
 
@@ -38,16 +39,23 @@ shot -q
 shot -b
 ```
 
+```bash
+# Take a screenshot of focused window, upload it your website and copy URL to clipboard
+shot -e 'xterm -e "scp %f _myserver:www/; echo 'http://myserver.fr/%n'; echo 'http://myserver.fr/%n' |xclip -selection clipboard; read a"'
+```
+
 #### Synopsis
 
 ```
-shot [-hbrRswqc] [name]
-    -b   : browse shots directory (~/shots by default)
+shot [-hbrRswqce] [name]
+    -b   : browse shots directory (/home/laurent/shots)
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot
     -s   : select manualy window instead of focused window
     -w   : whole screen instead of focused window
     -q   : do not ask filename
+    -c   : copy shot path to clipboard
+    -e   : execute command (%f=shot_path, %n=filename, %d=shot_date, %i=infos)
     name : optional, prepended to filename after date
            if not specified, will be asked using Zenity if -q not specified
 ```
