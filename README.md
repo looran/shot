@@ -1,6 +1,6 @@
-## shot - screenshot / video capture tool based on scrot and recordmydesktop
+### shot - screenshot / video capture tool based on scrot and recordmydesktop
 
-### Examples that you can bind to key shortcuts
+#### Examples that you can bind to key shortcuts
 
 ```bash
 # Capture shot focused window
@@ -32,7 +32,7 @@ shot.sh -q
 shot.sh -b
 ```
 
-### Synopsis
+#### Synopsis
 
 ```
 shot.sh [-h] [-r] [-w | -s] [-q] [-a] [name]
