@@ -44,6 +44,11 @@ shot -b
 shot -e 'xterm -e "scp %f _myserver:www/; echo 'http://myserver.fr/%n'; echo 'http://myserver.fr/%n' |xclip -selection clipboard; read a"'
 ```
 
+```bash
+# Take a video shot of focused window, upload it your website and copy URL to clipboard
+shot -r -e 'xterm -e "scp %f _myserver:www/; echo 'http://myserver.fr/%n'; echo 'http://myserver.fr/%n' |xclip -selection clipboard; read a"'
+```
+
 #### Synopsis
 
 ```
