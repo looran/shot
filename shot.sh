@@ -6,8 +6,7 @@
 
 # Dependencies:
 # * scrot
-# * xprop
-# Dependencies for videoshot:
+# Additional dependencies for videoshot:
 # * recordmydesktop
 # * xwininfo
 # * xdotool
