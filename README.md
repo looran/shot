@@ -59,6 +59,7 @@ By default it creates files like 20131211_153611_nameyouentered.png
 Dependencies:
 * scrot
 * xclip
+* zenity
 
 Additional dependencies for videoshot:
 * recordmydesktop

@@ -7,6 +7,7 @@
 # Dependencies:
 # * scrot
 # * xclip
+# * zenity
 # Additional dependencies for videoshot:
 # * recordmydesktop
 # * xwininfo
