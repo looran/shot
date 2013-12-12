@@ -4,6 +4,7 @@
 * Same commands to do both screenshot and videoshot
 * Nice date in shot title by default (20131212_032511)
 * No question mode (-q) = quick screenshots
+* -c copies path of shot to clipboard
 
 #### Examples that you can bind to key shortcuts
 
@@ -43,6 +44,7 @@ shot.sh -b
 shot.sh [-h] [-r] [-w | -s] [-q] [-a] [name]
     -b   : browse shots directory (~/shots by default)
     -r   : video instead of screenshot
+    -R   : video (with sound) instead of screenshot
     -s   : select manualy window instead of focused window
     -w   : whole screen instead of focused window
     -q   : do not ask filename

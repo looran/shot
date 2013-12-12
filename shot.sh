@@ -26,6 +26,7 @@ usage() {
 $program [-hbrswqc] [name]
     -b   : browse shots directory ($SHOTDIR)
     -r   : video instead of screenshot
+    -R   : video (with sound) instead of screenshot
     -s   : select manualy window instead of focused window
     -w   : whole screen instead of focused window
     -q   : do not ask filename
@@ -66,9 +67,10 @@ make_videoshot() {
         winid=$(xdotool getmouselocation --shell 2>/dev/null |grep WINDOW |sed 's".*=\(.*\)"\1"')
         opts="--windowid=$winid"
     fi
+    [ $video_sound -eq 0 ] && opts="$opts --no-sound"
     xterm -e " \
 echo -e \">>> To normally end a recording you can press ctrl-c <<<\n\n\"; \
-recordmydesktop --no-sound $opts -o $filename_tmp; \
+recordmydesktop $opts -o $filename_tmp; \
 echo -e \"\n>>> Capture ended <<<\"; \
 read a"
 }
@@ -77,17 +79,19 @@ program="$(basename "$0")"
 
 browse=0
 video=0
+video_sound=0
 select=0
 screen=0
 noname=0
 clip=0
-opts="$(getopt -o hbrswqc -n "$program" -- "$@")"
+opts="$(getopt -o hbrRswqc -n "$program" -- "$@")"
 err=$?
 eval set -- "$opts"
 while true; do case $1 in
     -h) header; echo; usage; echo; examples; exit 0;;
     -b) browse=1; shift ;;
     -r) video=1; shift ;;
+    -R) video=1; video_sound=1; shift ;;
     -s) select=1; shift ;;
     -w) screen=1; shift ;;
     -q) noname=1; shift ;;
