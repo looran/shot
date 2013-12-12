@@ -41,12 +41,12 @@ _EOF
 examples() {
     cat <<_EOF
 Example key shortcuts for your window manager:
-WIN + c         : shot.sh -c       (Capture shot focused window)
-WIN + SHIFT + c : shot.sh -c -w    (Capture shot whole screen)
-WIN + r         : shot.sh -c -r    (Record video focused window)
-WIN + SHIFT + r : shot.sh -c -r -w (Record video whole screen)
-WIN + ALT + c   : shot.sh -b       (Browse shots directory)
-WIN + g         : shot.sh -c -q    (Capture shot focused window, but unnamed)
+WIN + c         : shot -c       (Capture shot focused window)
+WIN + SHIFT + c : shot -c -w    (Capture shot whole screen)
+WIN + r         : shot -c -r    (Record video focused window)
+WIN + SHIFT + r : shot -c -r -w (Record video whole screen)
+WIN + ALT + c   : shot -b       (Browse shots directory)
+WIN + g         : shot -c -q    (Capture shot focused window, but unnamed)
 By using -c it also copies the path of the shot to the clipboard.
 _EOF
 }

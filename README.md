@@ -10,38 +10,38 @@
 
 ```bash
 # Capture shot focused window, and copy shot path to clipboard
-shot.sh -c
+shot -c
 ```
 
 ```bash
 # Capture shot whole screen
-shot.sh -w
+shot -w
 ```
 
 ```bash
 # Record video focused window, and copy shot path to clipboard
-shot.sh -c -r
+shot -c -r
 ```
 
 ```bash
 # Record video whole screen
-shot.sh -r -w
+shot -r -w
 ```
 
 ```bash
 # Capture shot focused window, but unnamed
-shot.sh -q
+shot -q
 ```
 
 ```bash
 # Browse shots directory
-shot.sh -b
+shot -b
 ```
 
 #### Synopsis
 
 ```
-shot.sh [-hbrRswqc] [name]
+shot [-hbrRswqc] [name]
     -b   : browse shots directory (~/shots by default)
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot
