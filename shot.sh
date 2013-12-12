@@ -23,7 +23,7 @@ _EOF
 
 usage() {
     cat <<_EOF
-$program [-hbrswqc] [name]
+$program [-hbrRswqc] [name]
     -b   : browse shots directory ($SHOTDIR)
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot

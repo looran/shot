@@ -41,7 +41,7 @@ shot.sh -b
 #### Synopsis
 
 ```
-shot.sh [-h] [-r] [-w | -s] [-q] [-a] [name]
+shot.sh [-hbrRswqc] [name]
     -b   : browse shots directory (~/shots by default)
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot
