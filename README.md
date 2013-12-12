@@ -56,6 +56,8 @@ By default it creates files like 20131211_153611_nameyouentered.png
 
 #### Dependencies
 
+On Ubuntu, just run "sudo make linux-dependencies"
+
 Dependencies:
 * scrot
 * xclip
@@ -63,5 +65,5 @@ Dependencies:
 
 Additional dependencies for videoshot:
 * recordmydesktop
-* xwininfo
+* xwininfo (in x11-utils in Ubuntu)
 * xdotool
