@@ -8,8 +8,8 @@
 #### Examples that you can bind to key shortcuts
 
 ```bash
-# Capture shot focused window
-shot.sh
+# Capture shot focused window, and copy shot path to clipboard
+shot.sh -c
 ```
 
 ```bash
@@ -18,8 +18,8 @@ shot.sh -w
 ```
 
 ```bash
-# Record video focused window
-shot.sh -r
+# Record video focused window, and copy shot path to clipboard
+shot.sh -c -r
 ```
 
 ```bash
@@ -56,6 +56,7 @@ By default it creates files like 20131211_153611_nameyouentered.png
 
 Dependencies:
 * scrot
+* xclip
 
 Additional dependencies for videoshot:
 * recordmydesktop

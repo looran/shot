@@ -6,6 +6,7 @@
 
 # Dependencies:
 # * scrot
+# * xclip
 # Additional dependencies for videoshot:
 # * recordmydesktop
 # * xwininfo
@@ -22,12 +23,13 @@ _EOF
 
 usage() {
     cat <<_EOF
-$program [-h] [-r] [-w | -s] [-q] [-a] [name]
+$program [-hbrswqc] [name]
     -b   : browse shots directory ($SHOTDIR)
     -r   : video instead of screenshot
     -s   : select manualy window instead of focused window
     -w   : whole screen instead of focused window
     -q   : do not ask filename
+    -c   : copy shot path to clipboard
     name : optional, prepended to filename after date
            if not specified, will be asked using Zenity if -q not specified
 
@@ -38,12 +40,13 @@ _EOF
 examples() {
     cat <<_EOF
 Example key shortcuts for your window manager:
-WIN + c         : shot.sh        (Capture shot focused window)
-WIN + SHIFT + c : shot.sh -w     (Capture shot whole screen)
-WIN + r         : shot.sh -r     (Record video focused window)
-WIN + SHIFT + r : shot.sh -r -w  (Record video whole screen)
-WIN + ALT + c   : shot.sh -b     (Browse shots directory)
-WIN + g         : shot.sh -q     (Capture shot focused window, but unnamed)
+WIN + c         : shot.sh -c       (Capture shot focused window)
+WIN + SHIFT + c : shot.sh -c -w    (Capture shot whole screen)
+WIN + r         : shot.sh -c -r    (Record video focused window)
+WIN + SHIFT + r : shot.sh -c -r -w (Record video whole screen)
+WIN + ALT + c   : shot.sh -b       (Browse shots directory)
+WIN + g         : shot.sh -c -q    (Capture shot focused window, but unnamed)
+By using -c it also copies the path of the shot to the clipboard.
 _EOF
 }
 
@@ -77,16 +80,18 @@ video=0
 select=0
 screen=0
 noname=0
-opts="$(getopt -o brswqh -n "$program" -- "$@")"
+clip=0
+opts="$(getopt -o hbrswqc -n "$program" -- "$@")"
 err=$?
 eval set -- "$opts"
 while true; do case $1 in
+    -h) header; echo; usage; echo; examples; exit 0;;
     -b) browse=1; shift ;;
     -r) video=1; shift ;;
     -s) select=1; shift ;;
     -w) screen=1; shift ;;
     -q) noname=1; shift ;;
-    -h) header; echo; usage; echo; examples; exit 0;;
+    -c) clip=1; shift ;;
     --) shift; break ;;
 esac done
 
@@ -132,6 +137,10 @@ else
     filename="${fileprefix}.${filesuffix}"
 fi
 mv $filename_tmp $filename
+
+if [ $clip -eq 1 ]; then
+    echo -n "$filename" | xclip -selection clipboard
+fi
 
 echo "created $filename ($info)"
 zenity --notification --text="created ${filename}\n($info)" &
