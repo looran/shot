@@ -41,7 +41,7 @@ shot.sh -b
 
 ```
 shot.sh [-h] [-r] [-w | -s] [-q] [-a] [name]
-    -b   : browse shots directory ($SHOTDIR)
+    -b   : browse shots directory (~/shots by default)
     -r   : video instead of screenshot
     -s   : select manualy window instead of focused window
     -w   : whole screen instead of focused window
