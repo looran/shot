@@ -52,3 +52,12 @@ shot.sh [-h] [-r] [-w | -s] [-q] [-a] [name]
 
 By default it creates files like 20131211_153611_nameyouentered.png
 
+#### Dependencies
+
+Dependencies:
+* scrot
+
+Additional dependencies for videoshot:
+* recordmydesktop
+* xwininfo
+* xdotool
