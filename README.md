@@ -1,4 +1,9 @@
-### shot - screenshot / video capture tool based on scrot and recordmydesktop
+#### shot - screenshot / video capture tool based on scrot and recordmydesktop
+
+* Short commands, easily bindable to key shortcuts
+* Same commands to do both screenshot and videoshot
+* Nice date in shot title by default (20131212_032511)
+* No question mode (-q) = quick screenshots
 
 #### Examples that you can bind to key shortcuts
 
