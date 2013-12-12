@@ -108,7 +108,7 @@ fi
 
 umask 0002
 filename_tmp=$(mktemp -u "/tmp/shotXXXXX")
-now=$(date +%Y%m%d%H%M%S)
+now=$(date +%Y%m%d_%H%M%S)
 if [ $video -eq 0 ]; then
     filesuffix="png"
     filename_tmp=$filename_tmp".png"
