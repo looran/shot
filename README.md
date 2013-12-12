@@ -1,6 +1,41 @@
-shot - screenshot / video capture tool based on scrot and recordmydesktop
+## shot - screenshot / video capture tool based on scrot and recordmydesktop
 
-$program [-h] [-r] [-w | -s] [-q] [-a] [name]
+### Examples that you can bind to key shortcuts
+
+```bash
+# Capture shot focused window
+shot.sh
+```
+
+```bash
+# Capture shot whole screen
+shot.sh -w
+```
+
+```bash
+# Record video focused window
+shot.sh -r
+```
+
+```bash
+# Record video whole screen
+shot.sh -r -w
+```
+
+```bash
+# Capture shot focused window, but unnamed
+shot.sh -q
+```
+
+```bash
+# Browse shots directory
+shot.sh -b
+```
+
+### Synopsis
+
+```
+shot.sh [-h] [-r] [-w | -s] [-q] [-a] [name]
     -b   : browse shots directory ($SHOTDIR)
     -r   : video instead of screenshot
     -s   : select manualy window instead of focused window
@@ -8,13 +43,7 @@ $program [-h] [-r] [-w | -s] [-q] [-a] [name]
     -q   : do not ask filename
     name : optional, prepended to filename after date
            if not specified, will be asked using Zenity if -q not specified
+```
 
-By default it creates files like 20131211_nameyouentered.png
+By default it creates files like 20131211_153611_nameyouentered.png
 
-Example key shortcuts for your window manager:
-WIN + c         : shot.sh        (Capture shot focused window)
-WIN + SHIFT + c : shot.sh -w     (Capture shot whole screen)
-WIN + r         : shot.sh -r     (Record video focused window)
-WIN + SHIFT + r : shot.sh -r -w  (Record video whole screen)
-WIN + ALT + c   : shot.sh -b     (Browse shots directory)
-WIN + g         : shot.sh -q     (Capture shot focused window, but unnamed)
