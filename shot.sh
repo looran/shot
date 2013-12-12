@@ -111,7 +111,7 @@ if [ ! -d $SHOTDIR ]; then
 fi
 
 if [ $browse -eq 1 ]; then
-    nautilus $SHOTDIR &
+    xdg-open $SHOTDIR &
     exit 0
 fi
 
