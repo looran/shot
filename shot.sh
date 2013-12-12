@@ -32,7 +32,7 @@ $program [-h] [-r] [-w | -s] [-q] [-a] [name]
     name : optional, prepended to filename after date
            if not specified, will be asked using Zenity if -q not specified
 
-By default it creates files like 20131211_nameyouentered.png
+By default it creates files like 20131211_133615_nameyouentered.png
 _EOF
 }
 
