@@ -52,8 +52,9 @@ shot -r -e 'xterm -e "scp %f _myserver:www/; echo 'http://myserver.fr/%n'; echo 
 #### Synopsis
 
 ```
-shot [-hbrRswqce] [name]
+shot [-hbBrRswqce] [name]
     -b   : browse shots directory (/home/laurent/shots)
+    -B   : open last shot with shutter
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot
     -s   : select manualy window instead of focused window
@@ -80,3 +81,6 @@ Additional dependencies for videoshot:
 * recordmydesktop
 * xwininfo (in x11-utils in Ubuntu)
 * xdotool
+
+Additional dependencies for opening shots:
+* shutter

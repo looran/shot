@@ -24,8 +24,9 @@ _EOF
 
 usage() {
     cat <<_EOF
-$program [-hbrRswqce] [name]
+$program [-hbBrRswqce] [name]
     -b   : browse shots directory ($SHOTDIR)
+    -B   : open last shot with shutter
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot
     -s   : select manualy window instead of focused window
@@ -80,6 +81,7 @@ read a"
 program="$(basename "$0")"
 
 browse=0
+browse_last=0
 video=0
 video_sound=0
 select=0
@@ -88,12 +90,13 @@ noname=0
 clip=0
 execute=0
 execute_command=""
-opts="$(getopt -o hbrRswqce: -n "$program" -- "$@")"
+opts="$(getopt -o hbBrRswqce: -n "$program" -- "$@")"
 err=$?
 eval set -- "$opts"
 while true; do case $1 in
     -h) header; echo; usage; echo; examples; exit 0;;
     -b) browse=1; shift ;;
+    -B) browse_last=1; shift ;;
     -r) video=1; shift ;;
     -R) video=1; video_sound=1; shift ;;
     -s) select=1; shift ;;
@@ -116,6 +119,11 @@ fi
 
 if [ $browse -eq 1 ]; then
     xdg-open $SHOTDIR &
+    exit 0
+elif [ $browse_last -eq 1 ]; then
+    last="$SHOTDIR/$(ls $SHOTDIR |tail -n1)"
+    [ -z "$last" ] && echo "ERROR: no last shot !" && exit 1
+    shutter -e -n --disable_systray $last &
     exit 0
 fi
 
