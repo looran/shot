@@ -140,7 +140,7 @@ if [ $# -eq 1 ]; then
     filename="${fileprefix}_$(echo $1 |sed s/" "/"_"/g).${filesuffix}"
 elif [ $noname -eq 0 ]; then
     name=$(zenity --entry --text="$action name ($info)" --title="shot")
-    [ ! -z $name ] && name="_$name"
+    [ ! -z "$name" ] && name="_$name"
     filename="${fileprefix}$(echo $name |sed s/" "/"_"/g).${filesuffix}"
 else
     filename="${fileprefix}.${filesuffix}"
