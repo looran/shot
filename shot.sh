@@ -119,7 +119,7 @@ if [ $browse -eq 1 ]; then
     exit 0
 fi
 
-umask 0002
+umask 0077
 filename_tmp=$(mktemp -u "/tmp/shotXXXXX")
 now=$(date +%Y%m%d_%H%M%S)
 if [ $video -eq 0 ]; then
