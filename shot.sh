@@ -165,7 +165,7 @@ if [ $clip -eq 1 ]; then
 fi
 
 echo "created $filename ($info)"
-notify-send "created ${filename}\n($info)" &
+notify-send "created $(basename ${filename})" "($info)" &
 
 if [ $execute -eq 1 ]; then
     f="$(echo $filename |sed 's/[\&/]/\\&/g')"
