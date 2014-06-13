@@ -79,6 +79,7 @@ read a"
 }
 
 program="$(basename "$0")"
+kdialog="$(type kdialog > /dev/null && echo 1 || echo 0)"
 
 browse=0
 browse_last=0
@@ -147,7 +148,11 @@ fileprefix=$SHOTDIR/${now}
 if [ $# -eq 1 ]; then
     filename="${fileprefix}_$(echo $1 |sed s/" "/"_"/g).${filesuffix}"
 elif [ $noname -eq 0 ]; then
-    name=$(zenity --entry --text="$action name ($info)" --title="shot")
+    if [ $kdialog -eq 1 ]; then
+        name=$(kdialog --inputbox "$action name ($info)" --title="shot")
+    else
+        name=$(zenity --entry --text="$action name ($info)" --title="shot")
+    fi
     [ ! -z "$name" ] && name="_$name"
     filename="${fileprefix}$(echo $name |sed s/" "/"_"/g).${filesuffix}"
 else
@@ -160,7 +165,7 @@ if [ $clip -eq 1 ]; then
 fi
 
 echo "created $filename ($info)"
-zenity --notification --text="created ${filename}\n($info)" &
+notify-send "created ${filename}\n($info)" &
 
 if [ $execute -eq 1 ]; then
     f="$(echo $filename |sed 's/[\&/]/\\&/g')"
