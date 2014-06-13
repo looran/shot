@@ -164,8 +164,10 @@ if [ $clip -eq 1 ]; then
     echo -n "$filename" | xclip -selection clipboard
 fi
 
-echo "created $filename ($info)"
-notify-send "created $(basename ${filename})" "($info)" &
+if [ $noname -ne 1 ]; then
+    echo "created $filename ($info)"
+    notify-send "created $(basename ${filename})" "($info)" &
+fi
 
 if [ $execute -eq 1 ]; then
     f="$(echo $filename |sed 's/[\&/]/\\&/g')"
