@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # shot - screenshot / video capture tool based on scrot and recordmydesktop
-# 2013, Laurent Ghigonis <laurent@gouloum.fr>
 # This file is licensed under the ISC license. Please see COPYING for more information.
 
 # Dependencies:
@@ -18,7 +17,7 @@ SHOTDIR="$HOME/shots"
 header() {
     cat <<_EOF
 shot - screenshot / video capture tool based on scrot and recordmydesktop
-2013, Laurent Ghigonis <laurent@gouloum.fr>
+2013, 2016, 2018, Laurent Ghigonis <laurent@gouloum.fr>
 _EOF
 }
 
@@ -54,32 +53,39 @@ By using -c it also copies the path of the shot to the clipboard.
 _EOF
 }
 
+trace() {
+    echo "$ $*"
+    "$@"
+}
+
 make_screenshot() {
     opts="-b"
-    [ $screen -eq 0 ] && opts=$opts" -u"
-    [ $select -eq 1 ] && opts=$opts" -s"
-    scrot $opts $filename_tmp
+    if [ $select -eq 1 ]; then
+        opts=$opts" -s"
+    elif [ $screen -eq 0 ]; then
+        opts=$opts" -u"
+    fi
+    trace scrot $opts $filename_tmp
 }
 
 make_videoshot() {
     opts=""
     if [ $select -eq 1 ]; then
         winid=$(xwininfo | awk '/Window id:/ {print $4}')
-        opts="--windowid=$winid"
+        opts="--windowid $winid"
     elif [ $screen -eq 0 ]; then
         winid=$(xdotool getmouselocation --shell 2>/dev/null |grep WINDOW |sed 's".*=\(.*\)"\1"')
-        opts="--windowid=$winid"
+        opts="--windowid $winid"
     fi
     [ $video_sound -eq 0 ] && opts="$opts --no-sound"
-    xterm -e " \
-echo -e \">>> To normally end a recording you can press ctrl-c <<<\n\n\"; \
-recordmydesktop $opts -o $filename_tmp; \
-echo -e \"\n>>> Capture ended <<<\"; \
-read a"
+    trace xterm -geometry 70x5 -e " \
+	echo -e \">>> To normally end a recording you can press ctrl-c <<<\n\n\"; \
+	recordmydesktop $opts -o $filename_tmp; \
+	echo -e \"\n>>> Capture ended <<<\"; \
+	read a"
 }
 
 program="$(basename "$0")"
-kdialog="$(type kdialog > /dev/null && echo 1 || echo 0)"
 
 browse=0
 browse_last=0
@@ -148,11 +154,7 @@ fileprefix=$SHOTDIR/${now}
 if [ $# -eq 1 ]; then
     filename="${fileprefix}_$(echo $1 |sed s/" "/"_"/g).${filesuffix}"
 elif [ $noname -eq 0 ]; then
-    if [ $kdialog -eq 1 ]; then
-        name=$(kdialog --inputbox "$action name ($info)" --title="shot")
-    else
-        name=$(zenity --entry --text="$action name ($info)" --title="shot")
-    fi
+    name=$(zenity --entry --text="$action name ($info)" --title="shot")
     [ ! -z "$name" ] && name="_$name"
     filename="${fileprefix}$(echo $name |sed s/" "/"_"/g).${filesuffix}"
 else
