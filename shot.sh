@@ -1,23 +1,29 @@
 #!/bin/sh
 
-# shot - screenshot / video capture tool based on scrot and recordmydesktop
+# shot - screenshot / video capture wrapper tool using maim, ksnip and recordmydesktop
 # This file is licensed under the ISC license. Please see COPYING for more information.
 
 # Dependencies:
-# * scrot
-# * xclip
-# * zenity
+# * maim (capture screenshot)
+# * xclip (copy file path to copypaste buffer)
+# * zenity (interactive window)
+# * ksnip (edit screenshot)
+# * xdotool (get active window)
+# * gwenview (shots browser)
 # Additional dependencies for videoshot:
 # * recordmydesktop
-# * xwininfo
-# * xdotool
+# * gnome-terminal (because the subprocess is started in hardcoded terminal)
+# * xdotool (get active window)
+# * xwininfo (select a window)
 
 SHOTDIR="$HOME/shots"
+
+set -e
 
 header() {
     cat <<_EOF
 shot - screenshot / video capture tool based on scrot and recordmydesktop
-2013, 2016, 2018, Laurent Ghigonis <laurent@gouloum.fr>
+2013, 2016, 2018, 2019, Laurent Ghigonis <laurent@ooookiwi@gmail.com>
 _EOF
 }
 
@@ -25,13 +31,13 @@ usage() {
     cat <<_EOF
 $program [-hbBrRswqce] [name]
     -b   : browse shots directory ($SHOTDIR)
-    -B   : open last shot with shutter
+    -B   : edit last shot
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot
     -s   : select manualy window instead of focused window
     -w   : whole screen instead of focused window
     -q   : do not ask filename
-    -c   : copy shot path to clipboard
+    -C   : don't copy shot path to clipboard
     -e   : execute command (%f=shot_path, %n=filename, %d=shot_date, %i=infos)
     name : optional, prepended to filename after date
            if not specified, will be asked using Zenity if -q not specified
@@ -43,12 +49,12 @@ _EOF
 examples() {
     cat <<_EOF
 Example key shortcuts for your window manager:
-WIN + c         : shot -c       (Capture shot focused window)
-WIN + SHIFT + c : shot -c -w    (Capture shot whole screen)
-WIN + r         : shot -c -r    (Record video focused window)
-WIN + SHIFT + r : shot -c -r -w (Record video whole screen)
-WIN + ALT + c   : shot -b       (Browse shots directory)
-WIN + g         : shot -c -q    (Capture shot focused window, but unnamed)
+WIN + c         : shot       (Capture shot focused window)
+WIN + SHIFT + c : shot -w    (Capture shot whole screen)
+WIN + r         : shot -r    (Record video focused window)
+WIN + SHIFT + r : shot -r -w (Record video whole screen)
+WIN + ALT + c   : shot -b    (Browse shots directory)
+WIN + g         : shot -q    (Capture shot focused window, but unnamed)
 By using -c it also copies the path of the shot to the clipboard.
 _EOF
 }
@@ -59,13 +65,14 @@ trace() {
 }
 
 make_screenshot() {
-    opts="-b"
+    opts="-u"
     if [ $select -eq 1 ]; then
         opts=$opts" -s"
     elif [ $screen -eq 0 ]; then
-        opts=$opts" -u"
+        opts=$opts" -i $(xdotool getactivewindow)"
     fi
-    trace scrot $opts $filename_tmp
+	echo $opts
+    trace maim $opts $filename_tmp
 }
 
 make_videoshot() {
@@ -77,8 +84,12 @@ make_videoshot() {
         winid=$(xdotool getmouselocation --shell 2>/dev/null |grep WINDOW |sed 's".*=\(.*\)"\1"')
         opts="--windowid $winid"
     fi
-    [ $video_sound -eq 0 ] && opts="$opts --no-sound"
-    trace xterm -geometry 70x5 -e " \
+    if [ $video_sound -eq 0 ]; then
+		opts="$opts --no-sound"
+	else
+		opts="$opts --device pulse"
+	fi
+    trace gnome-terminal --geometry 70x5 --wait -- sh -c "\
 	echo -e \">>> To normally end a recording you can press ctrl-c <<<\n\n\"; \
 	recordmydesktop $opts -o $filename_tmp; \
 	echo -e \"\n>>> Capture ended <<<\"; \
@@ -88,28 +99,28 @@ make_videoshot() {
 program="$(basename "$0")"
 
 browse=0
-browse_last=0
+edit_last=0
 video=0
 video_sound=0
 select=0
 screen=0
 noname=0
-clip=0
+clip=1
 execute=0
 execute_command=""
-opts="$(getopt -o hbBrRswqce: -n "$program" -- "$@")"
+opts="$(getopt -o hbBrRswqCe: -n "$program" -- "$@")"
 err=$?
 eval set -- "$opts"
 while true; do case $1 in
     -h) header; echo; usage; echo; examples; exit 0;;
     -b) browse=1; shift ;;
-    -B) browse_last=1; shift ;;
+    -B) edit_last=1; shift ;;
     -r) video=1; shift ;;
     -R) video=1; video_sound=1; shift ;;
     -s) select=1; shift ;;
     -w) screen=1; shift ;;
     -q) noname=1; shift ;;
-    -c) clip=1; shift ;;
+    -C) clip=0; shift ;;
     -e) execute=1; shift; execute_command=$1; shift ;;
     --) shift; break ;;
 esac done
@@ -125,12 +136,18 @@ if [ ! -d $SHOTDIR ]; then
 fi
 
 if [ $browse -eq 1 ]; then
-    xdg-open $SHOTDIR &
+    gwenview $SHOTDIR &
     exit 0
-elif [ $browse_last -eq 1 ]; then
-    last="$SHOTDIR/$(ls $SHOTDIR |tail -n1)"
-    [ -z "$last" ] && echo "ERROR: no last shot !" && exit 1
-    shutter -e -n --disable_systray $last &
+elif [ $edit_last -eq 1 ]; then
+	name_base="$(ls -tr $SHOTDIR |tail -n1)"
+    [ -z "$name_base" ] && echo "ERROR: no last shot !" && exit 1
+	name_edit="$(basename $name_base .png)_edited"
+	sed -i "s#SaveDirectory=.*#SaveDirectory=$SHOTDIR#" $HOME/.config/ksnip/ksnip.conf
+	sed -i "s/SaveFilename=.*/SaveFilename=$name_edit/" $HOME/.config/ksnip/ksnip.conf
+    ksnip -e "$SHOTDIR/$name_base"
+    if [ $clip -eq 1 ]; then
+		echo -n "$SHOTDIR/$(ls -tr $SHOTDIR |tail -n1)" |xclip -selection clipboard
+	fi
     exit 0
 fi
 
