@@ -4,16 +4,13 @@
 # This file is licensed under the ISC license. Please see COPYING for more information.
 
 # Dependencies:
-# * maim (capture screenshot)
+# * ksnip (capture and edit screenshot)
 # * xclip (copy file path to copypaste buffer)
 # * zenity (interactive window)
-# * ksnip (edit screenshot)
 # * xdotool (get active window)
-# * gwenview (shots browser)
 # Additional dependencies for videoshot:
 # * recordmydesktop
 # * gnome-terminal (because the subprocess is started in hardcoded terminal)
-# * xdotool (get active window)
 # * xwininfo (select a window)
 
 SHOTDIR="$HOME/shots"
@@ -30,7 +27,6 @@ _EOF
 usage() {
     cat <<_EOF
 $program [-hbBrRswqce] [name]
-    -b   : browse shots directory ($SHOTDIR)
     -B   : edit last shot
     -r   : video instead of screenshot
     -R   : video (with sound) instead of screenshot
@@ -98,7 +94,6 @@ make_videoshot() {
 
 program="$(basename "$0")"
 
-browse=0
 edit_last=0
 video=0
 video_sound=0
@@ -113,7 +108,6 @@ err=$?
 eval set -- "$opts"
 while true; do case $1 in
     -h) header; echo; usage; echo; examples; exit 0;;
-    -b) browse=1; shift ;;
     -B) edit_last=1; shift ;;
     -r) video=1; shift ;;
     -R) video=1; video_sound=1; shift ;;
@@ -135,10 +129,7 @@ if [ ! -d $SHOTDIR ]; then
     mkdir $SHOTDIR ||exit
 fi
 
-if [ $browse -eq 1 ]; then
-    gwenview $SHOTDIR &
-    exit 0
-elif [ $edit_last -eq 1 ]; then
+if [ $edit_last -eq 1 ]; then
 	name_base="$(ls -tr $SHOTDIR |tail -n1)"
     [ -z "$name_base" ] && echo "ERROR: no last shot !" && exit 1
 	name_edit="$(basename $name_base .png)_edited"
