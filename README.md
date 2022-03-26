@@ -1,86 +1,30 @@
-#### shot - screenshot / video capture tool based on scrot and recordmydesktop
+#### shot - screenshot / video capture tool based on ksnip and recordmydesktop
 
-* Short commands, easily bindable to key shortcuts
-* Same commands to do both screenshot and videoshot
-* Nice date in shot title by default (20131212_032511)
-* No question mode (-q) = quick screenshots
-* -c copies path of shot to clipboard
-* -e executes command (%f will be the shot path)
+* Explicit commands: `shot image window`, `show video screen`
+* Asks the image title after the shot
+* Coherent command between image and video shot
+* Date prefix in shot title `20131212_032511`
+* copies path of shot to clipboard
+* -x executes command after shot
 
-#### Examples that you can bind to key shortcuts
+Screenshot are named as follows: `<YYYYMMDD_HHMMSS>_<titled_you_entered>.png`
 
-```bash
-# Capture shot focused window, and copy shot path to clipboard
-shot -c
-```
-
-```bash
-# Capture shot whole screen
-shot -w
-```
-
-```bash
-# Record video focused window, and copy shot path to clipboard
-shot -c -r
-```
-
-```bash
-# Record video whole screen
-shot -r -w
-```
-
-```bash
-# Capture shot focused window, but unnamed
-shot -q
-```
-
-```bash
-# Browse shots directory
-shot -b
-```
-
-```bash
-# Take a screenshot of focused window, upload it your website and copy URL to clipboard
-shot -e 'xterm -e "scp %f _myserver:www/; echo 'http://myserver.fr/%n'; echo 'http://myserver.fr/%n' |xclip -selection clipboard; read a"'
-```
-
-```bash
-# Take a video shot of focused window, upload it your website and copy URL to clipboard
-shot -r -e 'xterm -e "scp %f _myserver:www/; echo 'http://myserver.fr/%n'; echo 'http://myserver.fr/%n' |xclip -selection clipboard; read a"'
-```
-
-#### Synopsis
+#### Usage
 
 ```
-shot [-hbBrRswqce] [name]
-    -b   : browse shots directory (/home/laurent/shots)
-    -B   : open last shot with shutter
-    -r   : video instead of screenshot
-    -R   : video (with sound) instead of screenshot
-    -s   : select manualy window instead of focused window
-    -w   : whole screen instead of focused window
+shot [-ehqsC] [-x <command>] (image selection|window|screen|allscreens | video window|screen) [name]
+options
+    -e   : edit screenshot after capture, can be specified alone
+    -h   : show extended help
     -q   : do not ask filename
-    -c   : copy shot path to clipboard
-    -e   : execute command (%f=shot_path, %n=filename, %d=shot_date, %i=infos)
+    -s   : enable sound for video
+    -C   : don't copy shot path to clipboard
+    -x <command>  : execute command (%f=shot_path, %n=filename, %d=shot_date, %i=file_infos)
     name : optional, prepended to filename after date
            if not specified, will be asked using Zenity if -q not specified
+Screenshot are named as follows: <YYYYMMDD_HHMMSS>_<titled_you_entered>.png in SHOTDIR=$HOME/shots
 ```
-
-By default it creates files like ```20131211_153611_nameyouentered.png```
 
 #### Dependencies
 
-On Ubuntu, just run ```sudo make linux-dependencies```
-
-Dependencies:
-* scrot
-* xclip
-* zenity
-
-Additional dependencies for videoshot:
-* recordmydesktop
-* xwininfo (in x11-utils in Ubuntu)
-* xdotool
-
-Additional dependencies for opening shots:
-* shutter
+See shot.sh

@@ -1,57 +1,50 @@
-#!/bin/sh
+#!/bin/bash
 
-# shot - screenshot / video capture wrapper tool using maim, ksnip and recordmydesktop
-# This file is licensed under the ISC license. Please see COPYING for more information.
+# shot - screenshot / video capture tool based on ksnip and recordmydesktop
+# 2013-2022 Laurent Ghigonis <ooookiwi@gmail.com>
+# This file is licensed under the ISC license. Please see LICENSING file for more information.
 
 # Dependencies:
-# * ksnip (capture and edit screenshot)
+# * ksnip (capture and edit screenshot), tested with version from git 20220322
 # * xclip (copy file path to copypaste buffer)
-# * zenity (interactive window)
-# * xdotool (get active window)
+# * zenity (interactive window to ask screenshot name)
 # Additional dependencies for videoshot:
 # * recordmydesktop
-# * gnome-terminal (because the subprocess is started in hardcoded terminal)
+# * xdotool (get active window)
 # * xwininfo (select a window)
+# * gnome-terminal (because the subprocess is started in hardcoded terminal)
 
-SHOTDIR="$HOME/shots"
+SHOTDIR="${SHOTDIR-$HOME/shots}"
+KSNIP_CONFIG=$HOME/.config/ksnip/ksnip.conf
+PROG="$(basename "$0")"
 
 set -e
 
-header() {
-    cat <<_EOF
-shot - screenshot / video capture tool based on scrot and recordmydesktop
-2013, 2016, 2018, 2019, Laurent Ghigonis <laurent@ooookiwi@gmail.com>
-_EOF
-}
-
 usage() {
     cat <<_EOF
-$program [-hbBrRswqce] [name]
-    -B   : edit last shot
-    -r   : video instead of screenshot
-    -R   : video (with sound) instead of screenshot
-    -s   : select manualy window instead of focused window
-    -w   : whole screen instead of focused window
+$PROG [-ehqsC] [-x <command>] (image selection|window|screen|allscreens | video window|screen) [name]
+options
+    -e   : edit screenshot after capture, can be specified alone
+    -h   : show extended help
     -q   : do not ask filename
+    -s   : enable sound for video
     -C   : don't copy shot path to clipboard
-    -e   : execute command (%f=shot_path, %n=filename, %d=shot_date, %i=infos)
+    -x <command>  : execute command (%f=shot_path, %n=filename, %d=shot_date, %i=file_infos)
     name : optional, prepended to filename after date
            if not specified, will be asked using Zenity if -q not specified
-
-By default it creates files like 20131211_133615_nameyouentered.png
+Screenshot are named as follows: <YYYYMMDD_HHMMSS>_<titled_you_entered>.png in SHOTDIR=$SHOTDIR
 _EOF
 }
 
 examples() {
     cat <<_EOF
 Example key shortcuts for your window manager:
-WIN + c         : shot       (Capture shot focused window)
-WIN + SHIFT + c : shot -w    (Capture shot whole screen)
-WIN + r         : shot -r    (Record video focused window)
-WIN + SHIFT + r : shot -r -w (Record video whole screen)
-WIN + ALT + c   : shot -b    (Browse shots directory)
-WIN + g         : shot -q    (Capture shot focused window, but unnamed)
-By using -c it also copies the path of the shot to the clipboard.
+WIN + c         : shot image window		(Capture screenshot of focused window)
+WIN + SHIFT + c : shot image selection	(Capture screenshot of custom selection)
+WIN + g         : shot -q shot screen	(Capture screenshot of current window, quietly without asking for name)
+WIN + r         : shot video window		(Record video of focused window)
+WIN + SHIFT + r : shot video screen		(Record video of whole screen)
+WIN + ALT + c   : shot edit				(edit last screenshot)
 _EOF
 }
 
@@ -60,131 +53,134 @@ trace() {
     "$@"
 }
 
-make_screenshot() {
-    opts="-u"
-    if [ $select -eq 1 ]; then
-        opts=$opts" -s"
-    elif [ $screen -eq 0 ]; then
-        opts=$opts" -i $(xdotool getactivewindow)"
-    fi
-	echo $opts
-    trace maim $opts $filename_tmp
+clipboard_set() {
+	local content="$1"
+	echo -n "$content" |xclip -selection clipboard
 }
 
-make_videoshot() {
-    opts=""
-    if [ $select -eq 1 ]; then
-        winid=$(xwininfo | awk '/Window id:/ {print $4}')
-        opts="--windowid $winid"
-    elif [ $screen -eq 0 ]; then
-        winid=$(xdotool getmouselocation --shell 2>/dev/null |grep WINDOW |sed 's".*=\(.*\)"\1"')
-        opts="--windowid $winid"
-    fi
-    if [ $video_sound -eq 0 ]; then
-		opts="$opts --no-sound"
-	else
-		opts="$opts --device pulse"
-	fi
-    trace gnome-terminal --geometry 70x5 --wait -- sh -c "\
-	echo -e \">>> To normally end a recording you can press ctrl-c <<<\n\n\"; \
-	recordmydesktop $opts -o $filename_tmp; \
-	echo -e \"\n>>> Capture ended <<<\"; \
-	read a"
+#ksnip_set_savefile() {
+#	local path="$1"
+#	sed -i "s#SaveDirectory=.*#SaveDirectory=$(dirname $path)#" $KSNIP_CONFIG
+#	sed -i "s/SaveFilename=.*/SaveFilename=$(basename ${path%.*})/" $KSNIP_CONFIG
+#}
+
+screenshot_edit() {
+	local path="$1"
+	[ ! -e "$path" ] && echo "ERROR: screenshot to edit does not exist ! ($path)" && exit 1
+#	path_edit="${path%.*}_edited.png"
+#	ksnip_set_savefile "$path_edit"
+	trace ksnip "$path" &
+	[ $clip -eq 1 ] && clipboard_set "$path_edit"
 }
 
-program="$(basename "$0")"
+waitfile() {
+	path="$1"
+	echo "XXX waitfile $path"
+	until [ -f "$path" ]; do sleep 0.3; echo .; done
+}
 
-edit_last=0
-video=0
 video_sound=0
-select=0
-screen=0
-noname=0
+quiet=0
 clip=1
-execute=0
-execute_command=""
-opts="$(getopt -o hbBrRswqCe: -n "$program" -- "$@")"
+edit=0
+execute=""
+opts="$(getopt -o ehqsCx: -n "$PROG" -- "$@")"
 err=$?
 eval set -- "$opts"
 while true; do case $1 in
-    -h) header; echo; usage; echo; examples; exit 0;;
-    -B) edit_last=1; shift ;;
-    -r) video=1; shift ;;
-    -R) video=1; video_sound=1; shift ;;
-    -s) select=1; shift ;;
-    -w) screen=1; shift ;;
-    -q) noname=1; shift ;;
+    -h) echo "screenshot / video capture tool based on ksnip and recordmydesktop"; echo; usage; echo; examples; exit 0 ;;
+	-e) edit=1; shift ;;
+    -q) quiet=1; shift ;;
+    -s) video_sound=1; shift ;;
     -C) clip=0; shift ;;
-    -e) execute=1; shift; execute_command=$1; shift ;;
+    -x) execute="$2"; shift; shift ;;
     --) shift; break ;;
 esac done
-
-if [ $err -ne 0 -o $# -gt 1 ]; then
-    usage && exit 1
-fi
-if [ $select -eq 1 -a $screen -eq 1 ]; then
-    echo "Error: cannot use -r with -w" && exit 1
-fi
+[ $err -ne 0 ] && usage && exit 1
+[ $edit -eq 1 -a $# -eq 0 ] && screenshot_edit "$SHOTDIR/$(ls -tr $SHOTDIR |tail -n1)" && exit 0
+[ $# -lt 2 -o $# -gt 3 ] && usage && exit 1
 if [ ! -d $SHOTDIR ]; then
     mkdir $SHOTDIR ||exit
 fi
-
-if [ $edit_last -eq 1 ]; then
-	name_base="$(ls -tr $SHOTDIR |tail -n1)"
-    [ -z "$name_base" ] && echo "ERROR: no last shot !" && exit 1
-	name_edit="$(basename $name_base .png)_edited"
-	sed -i "s#SaveDirectory=.*#SaveDirectory=$SHOTDIR#" $HOME/.config/ksnip/ksnip.conf
-	sed -i "s/SaveFilename=.*/SaveFilename=$name_edit/" $HOME/.config/ksnip/ksnip.conf
-    ksnip -e "$SHOTDIR/$name_base"
-    if [ $clip -eq 1 ]; then
-		echo -n "$SHOTDIR/$(ls -tr $SHOTDIR |tail -n1)" |xclip -selection clipboard
-	fi
-    exit 0
-fi
-
+name=""
+action=$1
+target=$2
+[ $# -eq 3 ] && name="$3"
 umask 0077
-filename_tmp=$(mktemp -u "/tmp/shotXXXXX")
+path_tmp=$(mktemp -u "/tmp/shotXXXXX")
 now=$(date +%Y%m%d_%H%M%S)
-if [ $video -eq 0 ]; then
-    filesuffix="png"
-    filename_tmp=$filename_tmp".png"
-    action="Screenshot"
-    make_screenshot
-else
-    filesuffix="ogv"
-    filename_tmp=$filename_tmp".ogv"
-    action="Videoshot"
-    make_videoshot
-fi
-info=$(ls -sh $filename_tmp |cut -d' ' -f1)
 
-fileprefix=$SHOTDIR/${now}
-if [ $# -eq 1 ]; then
-    filename="${fileprefix}_$(echo $1 |sed s/" "/"_"/g).${filesuffix}"
-elif [ $noname -eq 0 ]; then
-    name=$(zenity --entry --text="$action name ($info)" --title="shot")
+case $action in
+	i|img|image)
+		#pkill -x ksnip # XXX we need to kill ksnip otherwise it will interupt user even with -s
+		extension="png"
+		path_tmp=$path_tmp".png"
+		action="screenshot"
+		opts="-s"
+		[ $target = "selection" ] && opts="$opts -r"
+		[ $target = "window" ] && opts=$opts" -a"
+		[ $target = "screen" ] && opts=$opts" -m"
+		[ $target = "allscreens" ] && opts=$opts" -f"
+#		ksnip_set_savefile $path_tmp
+		trace ksnip $opts -p "$path_tmp" &
+		waitfile $path_tmp
+		;;
+	v|vid|video) 
+		extension="ogv"
+		path_tmp=$path_tmp".ogv"
+		action="videoshot"
+		if [ $target = "window" ]; then
+			winid=$(xwininfo | awk '/Window id:/ {print $4}')
+			opts="--windowid $winid"
+		elif [ $target = "screen" ]; then
+			winid=$(xdotool getmouselocation --shell 2>/dev/null |grep WINDOW |sed 's".*=\(.*\)"\1"')
+			opts="--windowid $winid"
+		else
+			usage && exit 1
+		fi
+		if [ $video_sound -eq 0 ]; then
+			opts="$opts --no-sound"
+		else
+			opts="$opts --device pulse"
+		fi
+		trace gnome-terminal --geometry 70x5 --wait -- sh -c "\
+		echo -e \">>> To normally end a recording you can press ctrl-c <<<\n\n\"; \
+		recordmydesktop $opts -o $path_tmp; \
+		echo -e \"\n>>> Capture ended <<<\"; \
+		read a"
+		;;
+	*)
+		usage && exit 1
+	;;
+esac
+file_info=$(ls -sh $path_tmp |cut -d' ' -f1)
+
+if [ ! -z "$name" ]; then
+    filename="${now}_$(echo $name |sed s/" "/"_"/g).${extension}"
+elif [ $quiet -eq 0 ]; then
+    name=$(zenity --entry --text="$action name ($file_info)" --title="shot")
     [ ! -z "$name" ] && name="_$name"
-    filename="${fileprefix}$(echo $name |sed s/" "/"_"/g).${filesuffix}"
+    filename="${now}$(echo $name |sed s/" "/"_"/g).${extension}"
 else
-    filename="${fileprefix}.${filesuffix}"
+    filename="${now}.${extension}"
 fi
-mv $filename_tmp $filename
+path="$SHOTDIR/$filename"
+trace mv "$path_tmp" "$path"
 
-if [ $clip -eq 1 ]; then
-    echo -n "$filename" | xclip -selection clipboard
+[ $edit -eq 1 ] && screenshot_edit $path
+[ $clip -eq 1 ] && clipboard_set $path
+
+if [ $quiet -eq 0 ]; then
+    echo "created $path ($file_info)"
+    notify-send "created $(basename ${path})" "($file_info)" &
 fi
 
-if [ $noname -ne 1 ]; then
-    echo "created $filename ($info)"
-    notify-send "created $(basename ${filename})" "($info)" &
-fi
-
-if [ $execute -eq 1 ]; then
-    f="$(echo $filename |sed 's/[\&/]/\\&/g')"
-    n=$(basename $filename)
+if [ ! -z "$execute" ]; then
+    f="$(echo $path |sed 's/[\&/]/\\&/g')"
+    n=$(basename $path)
     d="$now"
-    i="$info"
-    command=$(echo $execute_command |sed "s/"%f"/${f}/g" |sed "s/"%n"/${n}/g" |sed "s/"%d"/${d}/g" |sed "s/"%i"/${i}/g")
+    i="$file_info"
+    command=$(echo "$execute" |sed "s/"%f"/${f}/g" |sed "s/"%n"/${n}/g" |sed "s/"%d"/${d}/g" |sed "s/"%i"/${i}/g")
     echo "running $command"
-    eval $command
+    $command
 fi
