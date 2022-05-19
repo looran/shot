@@ -55,7 +55,7 @@ trace() {
 
 clipboard_set() {
 	local content="$1"
-	echo -n "$content" |xclip -selection clipboard
+	echo -n "$content" |trace xclip -selection clipboard
 }
 
 #ksnip_set_savefile() {
@@ -69,8 +69,8 @@ screenshot_edit() {
 	[ ! -e "$path" ] && echo "ERROR: screenshot to edit does not exist ! ($path)" && exit 1
 #	path_edit="${path%.*}_edited.png"
 #	ksnip_set_savefile "$path_edit"
-	trace ksnip "$path" &
-	[ $clip -eq 1 ] && clipboard_set "$path_edit"
+	trace ksnip "$path"
+	[ $clip -eq 1 ] && clipboard_set "$path"
 }
 
 waitfile() {
