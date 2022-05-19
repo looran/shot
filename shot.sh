@@ -75,7 +75,6 @@ screenshot_edit() {
 
 waitfile() {
 	path="$1"
-	echo "XXX waitfile $path"
 	until [ -f "$path" ]; do sleep 0.3; echo .; done
 }
 
@@ -112,7 +111,6 @@ now=$(date +%Y%m%d_%H%M%S)
 
 case $action in
 	i|img|image)
-		#pkill -x ksnip # XXX we need to kill ksnip otherwise it will interupt user even with -s
 		extension="png"
 		path_tmp=$path_tmp".png"
 		action="screenshot"
