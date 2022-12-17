@@ -7,7 +7,7 @@
 # Dependencies:
 # * ksnip (capture and edit screenshot), tested with version from git 20220322
 # * xclip (copy file path to copypaste buffer)
-# * zenity (interactive window to ask screenshot name)
+# * kdialog (interactive window to ask screenshot name)
 # Additional dependencies for videoshot:
 # * recordmydesktop
 # * xdotool (get active window)
@@ -156,7 +156,7 @@ file_info=$(ls -sh $path_tmp |cut -d' ' -f1)
 if [ ! -z "$name" ]; then
     filename="${now}_$(echo $name |sed s/" "/"_"/g).${extension}"
 elif [ $quiet -eq 0 ]; then
-    name=$(zenity --entry --text="$action name ($file_info)" --title="shot")
+    name=$(kdialog --inputbox "$action name ($file_info)" --title="shot")
     [ ! -z "$name" ] && name="_$name"
     filename="${now}$(echo $name |sed s/" "/"_"/g).${extension}"
 else
