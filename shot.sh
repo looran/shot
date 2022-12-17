@@ -12,7 +12,7 @@
 # * recordmydesktop
 # * xdotool (get active window)
 # * xwininfo (select a window)
-# * gnome-terminal (because the subprocess is started in hardcoded terminal)
+# * xterm (because the subprocess is started in hardcoded terminal)
 
 SHOTDIR="${SHOTDIR-$HOME/shots}"
 KSNIP_CONFIG=$HOME/.config/ksnip/ksnip.conf
@@ -141,7 +141,7 @@ case $action in
 		else
 			opts="$opts --device pulse"
 		fi
-		trace gnome-terminal --geometry 70x5 --wait -- sh -c "\
+		trace xterm -geometry 100x20+0-30 -e sh -c "\
 		echo -e \">>> To normally end a recording you can press ctrl-c <<<\n\n\"; \
 		recordmydesktop $opts -o $path_tmp; \
 		echo -e \"\n>>> Capture ended <<<\"; \
