@@ -39,12 +39,12 @@ _EOF
 examples() {
     cat <<_EOF
 Example key shortcuts for your window manager:
-WIN + c         : shot image window		(Capture screenshot of focused window)
-WIN + SHIFT + c : shot image selection	(Capture screenshot of custom selection)
-WIN + g         : shot -q shot screen	(Capture screenshot of current window, quietly without asking for name)
-WIN + r         : shot video window		(Record video of focused window)
-WIN + SHIFT + r : shot video screen		(Record video of whole screen)
-WIN + ALT + c   : shot edit				(edit last screenshot)
+WIN + c         : shot image window     (Capture screenshot of focused window)
+WIN + SHIFT + c : shot image select     (Capture screenshot of custom selection)
+WIN + g         : shot -q shot screen   (Capture screenshot of current window, quietly without asking for name)
+WIN + r         : shot video window     (Record video of focused window)
+WIN + SHIFT + r : shot video screen     (Record video of whole screen)
+WIN + ALT + c   : shot edit             (edit last screenshot)
 _EOF
 }
 
