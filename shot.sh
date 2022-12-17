@@ -22,7 +22,7 @@ set -e
 
 usage() {
     cat <<_EOF
-$PROG [-ehqsC] [-x <command>] (image selection|window|screen|allscreens | video window|screen) [name]
+$PROG [-ehqsC] [-x <command>] (image selection|window|screen|allscreens | video selection|window|screen) [name]
 options
     -e   : edit screenshot after capture, can be specified alone
     -h   : show extended help
@@ -127,12 +127,14 @@ case $action in
 		extension="ogv"
 		path_tmp=$path_tmp".ogv"
 		action="videoshot"
-		if [ $target = "window" ]; then
+		if [ $target = "selection" ]; then
 			winid=$(xwininfo | awk '/Window id:/ {print $4}')
 			opts="--windowid $winid"
-		elif [ $target = "screen" ]; then
+		elif [ $target = "window" ]; then
 			winid=$(xdotool getmouselocation --shell 2>/dev/null |grep WINDOW |sed 's".*=\(.*\)"\1"')
 			opts="--windowid $winid"
+		elif [ $target = "screen" ]; then
+			opts=""
 		else
 			usage && exit 1
 		fi
