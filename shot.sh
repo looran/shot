@@ -22,7 +22,7 @@ set -e
 
 usage() {
     cat <<_EOF
-$PROG [-ehqsC] [-x <command>] (image selection|window|screen|allscreens | video selection|window|screen) [name]
+$PROG [-ehqsC] [-x <command>] (image select|window|screen|allscreens | video select|window|screen) [name]
 options
     -e   : edit screenshot after capture, can be specified alone
     -h   : show extended help
@@ -115,7 +115,7 @@ case $action in
 		path_tmp=$path_tmp".png"
 		action="screenshot"
 		opts="-s"
-		[ $target = "selection" ] && opts="$opts -r"
+		[ $target = "select" ] && opts="$opts -r"
 		[ $target = "window" ] && opts=$opts" -a"
 		[ $target = "screen" ] && opts=$opts" -m"
 		[ $target = "allscreens" ] && opts=$opts" -f"
@@ -127,7 +127,7 @@ case $action in
 		extension="ogv"
 		path_tmp=$path_tmp".ogv"
 		action="videoshot"
-		if [ $target = "selection" ]; then
+		if [ $target = "select" ]; then
 			winid=$(xwininfo | awk '/Window id:/ {print $4}')
 			opts="--windowid $winid"
 		elif [ $target = "window" ]; then
